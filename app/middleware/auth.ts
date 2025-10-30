@@ -3,12 +3,21 @@ import { useAuthStore } from "~/stores/auth.store";
 export default defineNuxtRouteMiddleware((to) => {
   const auth = useAuthStore();
 
-  console.log(auth.isAuthenticated);
-
-  if (!auth.isAuthenticated && to.path !== "/") {
-    return navigateTo("/");
+  if (!auth.isAuthenticated) {
+    if (to.path !== "/") {
+      return navigateTo("/");
+    }
+    return;
   }
-  if (auth.isAuthenticated && to.path === "/") {
+
+  if (auth.isAuthenticated && !auth.isCompleted) {
+    if (to.path !== "/complete-profile") {
+      return navigateTo("/complete-profile");
+    }
+    return;
+  }
+
+  if (auth.isAuthenticated && auth.isCompleted && to.path === "/") {
     return navigateTo("/home");
   }
 });

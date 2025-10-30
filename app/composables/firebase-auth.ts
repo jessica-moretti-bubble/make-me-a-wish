@@ -2,7 +2,7 @@ import {
   createUserWithEmailAndPassword,
   getIdToken,
   signInWithEmailAndPassword,
-  type UserCredential,
+  type User,
 } from "firebase/auth";
 import { auth } from "../composables/firebase.config.js";
 import { FirebaseError } from "firebase/app";
@@ -28,29 +28,34 @@ export async function registerUser(data: AuthPayload) {
   );
 }
 
-export function loginUser(data: AuthPayload) {
+type LoginResponse = {
+  user: User | null;
+  error: string | null;
+};
+
+export function loginUser(data: AuthPayload): Promise<LoginResponse> {
   const { email, password } = data;
   const authStore = useAuthStore();
 
   return signInWithEmailAndPassword(auth, email, password)
-    .then(async (userCredential: UserCredential) => {
+    .then(async (userCredential) => {
       const user = userCredential.user;
-
       const idToken = await getIdToken(user);
       const refreshToken = user.refreshToken;
 
       authStore.setUser(email, undefined);
       authStore.setTokens(idToken, refreshToken);
 
-      return { user };
+      return { user, error: null };
     })
-    .catch((error: unknown) => {
-      if (error instanceof FirebaseError) {
-        return { error: getFirebaseErrorMessage(error) };
-      } else if (error instanceof Error) {
-        return { error: getFirebaseErrorMessage(error) };
-      } else {
-        return { error: "Errore sconosciuto durante il login." };
-      }
+    .catch((err: unknown) => {
+      const errorMessage =
+        err instanceof FirebaseError
+          ? getFirebaseErrorMessage(err)
+          : err instanceof Error
+          ? err.message
+          : "Errore sconosciuto durante il login.";
+
+      return { user: null, error: errorMessage };
     });
 }
