@@ -19,7 +19,8 @@
 
             <div class="w-full flex justify-center items-center flex-col gap-y-4">
                 <p>Oppure</p>
-                <GenericButton label="Continua con Google" variant="secondary" icon-name="logos:google-icon" />
+                <GenericButton label="Continua con Google" variant="secondary" icon-name="logos:google-icon"
+                    @click="handleGoogleLogin" />
             </div>
         </div>
     </form>
@@ -31,14 +32,10 @@ import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import GenericButton from '~/components/common/GenericButton.vue'
 import GenericInput from '~/components/common/GenericInput.vue'
-import { loginUser } from '~/composables/firebase-auth'
+import { loginUser, loginWithGoogle } from '~/composables/firebase-auth'
 import { AuthPayloadSchema } from '~/schemas/auth/auth.schema'
 
-
-
 const router = useRouter()
-
-
 
 const { handleSubmit, meta } = useForm({
     validationSchema: toTypedSchema(AuthPayloadSchema),
@@ -60,6 +57,16 @@ watch([email, password], () => {
     if (serverError.value) serverError.value = ''
 })
 
+async function handleGoogleLogin() {
+    const { error } = await loginWithGoogle();
+    if (error) {
+        serverError.value = error
+
+        return
+    }
+    router.push('/home')
+}
+
 const onSubmit = handleSubmit(async (values) => {
     const { error } = await loginUser(values)
 
@@ -68,7 +75,6 @@ const onSubmit = handleSubmit(async (values) => {
 
         return
     }
-
     router.push('/home')
 })
 </script>

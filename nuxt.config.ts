@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     "@nuxtjs/google-fonts",
     "@nuxtjs/color-mode",
     "@nuxt/icon",
-    "@nuxtjs/toast",
   ],
 
   pinia: {

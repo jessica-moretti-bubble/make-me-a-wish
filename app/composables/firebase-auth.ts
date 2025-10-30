@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getIdToken,
   signInWithEmailAndPassword,
+  signInWithPopup,
   type User,
 } from "firebase/auth";
-import { auth } from "../composables/firebase.config.js";
+
+import { auth, googleProvider } from "../composables/firebase.config.js";
 import { FirebaseError } from "firebase/app";
 import { useAuthStore } from "~/stores/auth.store.js";
 import { getFirebaseErrorMessage } from "~/config/auth/firebase-error-message.js";
@@ -57,5 +61,25 @@ export function loginUser(data: AuthPayload): Promise<LoginResponse> {
           : "Errore sconosciuto durante il login.";
 
       return { user: null, error: errorMessage };
+    });
+}
+
+export async function loginWithGoogle(): Promise<LoginResponse> {
+  const authStore = useAuthStore();
+
+  return signInWithPopup(auth, googleProvider)
+    .then(async (result) => {
+      const user = result.user;
+      const idToken = await getIdToken(user);
+      authStore.setTokens(idToken, user.refreshToken);
+
+      if (user.email) authStore.setUser(user.email, undefined);
+
+      return { user, error: null };
+    })
+    .catch((error) => {
+      console.log(error, "error");
+
+      return { user: null, error: error };
     });
 }

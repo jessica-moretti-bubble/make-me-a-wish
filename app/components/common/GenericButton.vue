@@ -7,7 +7,7 @@
         variant === 'primary'
             ? 'bg-gradient-primary text-white hover:opacity-90'
             : 'bg-white text-black border border-gray-300 hover:bg-gray-100'
-    ]">
+    ]" @click="$emit('click')">
         <div class="flex items-center justify-center gap-x-4">
             <Icon v-if="iconName" :name="iconName" class="text-white" style="scale: 1.2;" />
             <p>{{ label }}</p>
@@ -33,5 +33,9 @@ defineProps({
         type: Boolean,
         default: false,
     },
+
 })
+
+defineEmits(['click'])
+
 </script>
