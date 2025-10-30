@@ -16,8 +16,8 @@ export const useAuthStore = defineStore("auth", {
   }),
 
   getters: {
-    userEmail: (state) => state.authData.email,
-    userName: (state) => state.authData.username,
+    userData: (state) => state.authData,
+    isAuthenticated: (state) => state.authData.accessToken,
   },
 
   actions: {
@@ -40,4 +40,5 @@ export const useAuthStore = defineStore("auth", {
       };
     },
   },
+  persist: true,
 });

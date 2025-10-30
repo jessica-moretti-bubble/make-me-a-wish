@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxt/test-utils",
     "@nuxt/ui",
     "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
   ],
   pinia: {
     storesDirs: ["./stores"],
