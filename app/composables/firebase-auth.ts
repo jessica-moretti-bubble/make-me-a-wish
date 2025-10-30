@@ -28,36 +28,29 @@ export async function registerUser(data: AuthPayload) {
   );
 }
 
-export async function loginUser(data: AuthPayload) {
+export function loginUser(data: AuthPayload) {
   const { email, password } = data;
-
   const authStore = useAuthStore();
 
-  try {
-    const userCredential: UserCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+  return signInWithEmailAndPassword(auth, email, password)
+    .then(async (userCredential: UserCredential) => {
+      const user = userCredential.user;
 
-    const user = userCredential.user;
+      const idToken = await getIdToken(user);
+      const refreshToken = user.refreshToken;
 
-    const idToken = await getIdToken(user);
+      authStore.setUser(email, undefined);
+      authStore.setTokens(idToken, refreshToken);
 
-    const refreshToken = user.refreshToken;
-
-    authStore.setUser(email, undefined);
-
-    authStore.setTokens(idToken, refreshToken);
-
-    return { user };
-  } catch (error) {
-    if (error instanceof FirebaseError) {
-      return { error: getFirebaseErrorMessage(error) };
-    } else if (error instanceof Error) {
-      return { error: getFirebaseErrorMessage(error) };
-    } else {
-      return { error: "Errore sconosciuto durante il login." };
-    }
-  }
+      return { user };
+    })
+    .catch((error: unknown) => {
+      if (error instanceof FirebaseError) {
+        return { error: getFirebaseErrorMessage(error) };
+      } else if (error instanceof Error) {
+        return { error: getFirebaseErrorMessage(error) };
+      } else {
+        return { error: "Errore sconosciuto durante il login." };
+      }
+    });
 }
